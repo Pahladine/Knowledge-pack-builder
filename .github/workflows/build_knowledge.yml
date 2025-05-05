@@ -1,0 +1,29 @@
+name: Build knowledge pack
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Fetch + pack sources
+        run: python scripts/fetch_sources.py
+
+      - name: Slice to 7-MB chunks
+        run: python scripts/slice_pack.py knowledge-pack.tar.zst 7340032
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: knowledge_slices
+          path: |
+            knowledge-pack.tar.zst.*
